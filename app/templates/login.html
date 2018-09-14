@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block app_content %}
+<div class=view" style="height:100vh">
+  <div class="col-md-8 col-md-offset-4">
+    <div class="card card-login mx-auto mt-5">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card-header"><h2 align="center">Login</h2></div>
+          {{ wtf.quick_form(form, button_map={'submit':'btn btn-primary btn-block'}) }}
+          <div class="text-center">
+            <a class="d-block small mt-3" href="{{ url_for('company_registration') }}">Register an Account</a>
+            <span>|</span>
+            <a class="d-block small" href="forgot-password.html">Forgot Password?</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}

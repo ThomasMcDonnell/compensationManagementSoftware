@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Charts JavaScript -->
+<script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+
+<script>
+
+    var getData = $.get('/record/api')
+    getData.done(function (results) {
+        var data = {
+            // A labels array that can contain any sort of values
+            labels: results.date,
+            // Our series array that contains series objects or in this case series data arrays
+            series: [
+                results.bonus
+            ]
+        }
+        var options = {
+            showArea: true
+        }
+        // Create a new line chart object where as first parameter we pass in a selector
+        // that is resolving to our chart container element. The Second parameter
+        // is the actual data object.
+        var myChart = new Chartist.Line('.ct-chart-one', data, options);
+
+        var data = {
+            labels: results.date,
+            series: [
+                results.bonus
+            ]
+        };
+
+        var options = {
+            seriesBarDistance: 5
+        };
+
+        var responsiveOptions = [
+            ['screen and (max-width: 640px)', {
+                axisX: {
+                    labelInterpolationFnc: function (value) {
+                        return value[0];
+                    }
+                }
+            }]
+        ];
+
+        var myBarChart = new Chartist.Bar('.ct-chart-two', data, options, responsiveOptions);
+
+        var data = {
+            labels: results.date,
+            series: [results.msr]
+        };
+
+        var options = {
+            seriesBarDistance: 5,
+            reverseData: true,
+            horizontalBars: true,
+            axisY: {
+                offset: 70
+            }
+        };
+
+        var myMsrBarChart = new Chartist.Bar('.ct-chart-three', data, options)
+    });
+    var getData = $.get('/record/qtr/api')
+    getData.done(function (results) {
+        var data = {
+            labels: ['QTR 1', 'QTR 2', 'QTR 3', 'QTR 4'],
+            series: [results.qtr1, results.qtr2, results.qtr3, results.qtr4]
+        };
+
+        var options = {
+            labelInterpolationFnc: function (value) {
+                return value[0]
+            }
+        };
+
+        var responsiveOptions = [
+            ['screen and (min-width: 640px)', {
+                chartPadding: 30,
+                labelOffset: 100,
+                labelDirection: 'explode',
+                labelInterpolationFnc: function (value) {
+                    return value;
+                }
+            }],
+            ['screen and (min-width: 1024px)', {
+                labelOffset: 100,
+                chartPadding: 30
+            }]
+        ];
+
+        new Chartist.Pie('.ct-chart-four', data, options, responsiveOptions);
+
+    });
+
+</script>
+
+  {% endblock %}
+ 
+{% block styles %}
+{{ super() }}
+<!-- Chartist.js CSS -->
+<link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+{% endblock %}
+
+
+{% block navbar %}
+{{ super() }}
+<div id="wrapper">
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{ url_for('index') }}">SB Admin</a>
+    </div>
+    <!-- Top Menu Items -->
+    <ul class="nav navbar-right top-nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="fa fa-user"></i> {{ company.company_name.capitalize() }} <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="#"><i class="fa fa-fw fa-user">
+              </i> {{ current_user.first_name.capitalize() }}</a>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <a href="{{ url_for('logout') }}"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+      <ul class="nav navbar-nav side-nav">
+        {% if current_user.is_admin %}
+        <li class="active">
+          <a href="{{ url_for('index') }}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+        </li>
+        {% endif %}
+        <li>
+          <a href="{{ url_for('analytics') }}"><i class="fa fa-fw fa-bar-chart-o"></i> Analytics</a>
+        </li>
+        <li>
+          <a href="javascript:;" data-toggle="collapse" data-target="#rotas">
+            <i class="fa fa-fw fa-table"></i> Rotas <i class="fa fa-fw fa-caret-down"></i>
+          </a>
+          <ul id="rotas" class="collapse">
+            {% for rota in rotas %}
+            <li>
+              <a type="button" href="{{ url_for('file_download', id=rota.id) }}"><i class="fa fa-fw fa-file"></i>
+                {{ rota }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </li>       
+      </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+  </nav>
+
+  {% endblock %}
+  {% block app_content %}
+  <!-- Morris Charts -->
+  <div class="row">
+    <div class="col-lg-12">
+      <h2 class="page-header">Bonus Charts</h2>
+      <p class="lead">Morris.js is a very simple API for drawing line, bar, area and donut charts. For full usage instructions and documentation for Morris.js charts, visit.</p>
+    </div>
+  </div>
+  <!-- /.row -->
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="panel panel-green">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i class="fa fa-bar-chart-o"></i> Area Line Graph | Bonus </h3>
+        </div>
+        <div class="panel-body">
+          <div class="ct-chart-one ct-perfect-fourth"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.row -->
+
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Bar Chart | Bonus</h3>
+        </div>
+        <div class="panel-body">
+          <div class="ct-chart-two ct-perfect-fourth"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel panel-red">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Bar Chart | MSR %</h3>
+        </div>
+        <div class="panel-body">
+          <div class="ct-chart-three ct-perfect-fourth"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel panel-yellow">
+        <div class="panel-heading">
+          <h3 class="panel-title"><i class="fa fa-long-arrow-right"></i> Pie Chart | Bonus Quarter on Quarter</h3>
+        </div>
+        <div class="panel-body">
+          <div class="ct-chart-four ct-perfect-fourth"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.row -->
+
+  {% endblock %}

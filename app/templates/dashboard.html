@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block navbar %}
+{{ super() }}
+<div id="wrapper">
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{ url_for('index') }}">SB Admin</a>
+    </div>
+
+    <!-- Top Menu Items -->
+    <ul class="nav navbar-right top-nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="fa fa-user"> </i> {{ company.company_name.capitalize() }} <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="#"><i class="fa fa-fw fa-user">
+              </i> {{ current_user.first_name.capitalize() }}</a>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <a href="{{ url_for('logout') }}"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+      <ul class="nav navbar-nav side-nav">
+        <li class="active">
+          <a href="{{ url_for('index') }}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+        </li>
+        <li>
+          <a href="{{ url_for('analytics') }}"><i class="fa fa-fw fa-bar-chart-o"></i> Analytics</a>
+        </li>
+        <li>
+          <a href="javascript:;" data-toggle="collapse" data-target="#rotas">
+            <i class="fa fa-fw fa-table"></i> Rotas <i class="fa fa-fw fa-caret-down"></i>
+          </a>
+          <ul id="rotas" class="collapse">
+            {% for rota in rotas %}
+            <li>
+              <a type="button" href="{{ url_for('file_download', id=rota.id) }}"><i class="fa fa-fw fa-file"></i>
+                {{ rota }}
+              </a>
+            </li>
+            {% endfor %}
+         </ul>
+        </li>
+          <li>
+          <a href="javascript:;" data-toggle="collapse" data-target="#options">
+            <i class="fa fa-fw fa-arrows-v"></i> Dashboard Options <i class="fa fa-fw fa-caret-down"></i>
+          </a>
+          <ul id="options" class="collapse">
+            <li>
+              <a data-placement="right" data-toggle="popover" data-title="Create Employee" data-container="body" type="button" data-html="true" id="employee">
+                Create Employee
+              </a>
+              <div id="popover-content-employee" class="hide">
+                {{ wtf.quick_form(form, action=url_for('employee'), button_map={'submit':'btn btn-success btn-block'}) }}        
+              </div>
+            </li>
+            <li>
+              <a data-placement="right" data-toggle="popover" data-title="Create Record" data-container="body" type="button" data-html="true" id="record">Create Record</a>
+              <div id="popover-content" class="hide">
+                {{ wtf.quick_form(form_record, action=url_for('record'), button_map={'submit':'btn btn-success btn-block'}) }}        
+              </div>
+            </li>
+            <li>
+              <a data-placement="right" data-toggle="popover" data-title="Upload Rota" data-container="body" type="button" data-html="true" id="rota">Upload Rota</a>
+              <div id="popover-content-rota" class="hide">
+                {{ wtf.quick_form(form_file_upload, action=url_for('upload_file'), button_map={'submit':'btn btn-success btn-block'}) }}        
+              </div>
+            </li>
+            <li>
+                <a data-placement="right" data-toggle="popover" data-title="Delete All Records" data-container="body" type="button" data-html="true" id="delete-records"> Delete All Records</a>
+              <div id="popover-content-delete-records" class="hide">
+                <form action="{{ url_for('delete_all_records', id=current_user.id) }}" method="POST">
+                  <input class="btn btn-xs btn-danger btn-block" type="submit" value="Delete">
+                </form>
+              </div>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <!-- /.navbar-collapse -->
+  </nav>
+
+  {% endblock %}
+  {% block app_content %}
+  <!-- DataTables Employees -->
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr class="success">
+              <th colspan="5" class="text-center"><h2>Employees</h2></th>
+            </tr>
+          </thead>
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Last Active</th>
+              <th class="text-center"><em class="fa fa-trash"></em></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for employee in company.employees %}
+            <tr>
+              <td>{{ employee.first_name.capitalize() }}</td>
+              <td>{{ employee.last_name.capitalize() }}</td>
+              <td>{{ employee.email }}</td>
+              <td>{{ moment(employee.last_active).format('LLL') }}</td>
+              {% if employee.is_admin %}
+              <td class="text-center"><em><button type="button" class="btn btn-xs-danger" disabled>Delete</button></em></td>
+              {% else %}
+              <td class="text-center">
+                <form action="{{ url_for('delete_employee' , id=employee.id) }}" method="POST">
+                  <em><input class="btn btn-xs btn-danger" type="submit" value="Delete"></em>
+                </form>
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- DataTables Records -->
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr class="success">
+                  <th colspan="6" class="text-center"><h2>Records</h2></th>
+                </tr>
+              </thead>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Quarter</th>
+                  <th>Gross</th>
+                  <th>Bonus Amount</th>
+                  <th>MSR</th>
+                  <th class="text-center"><em class="fa fa-trash"></em></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for record in records %}
+                <tr>
+                  <td>{{ moment(record.timestamp).format('LL') }}</td>
+                  <td>{{ record.qtr }}</td>
+                  <td><em class="glyphicon glyphicon-euro"></em> {{ record.gross }}</td>
+                  <td><em class="glyphicon glyphicon-euro"></em> {{ record.amount }}</td>
+                  <td>{{ record.msr }} %</td>
+                  <td class="text-center">
+                    <form action="{{ url_for('delete_record' , id=record.id) }}" method="POST">
+                      <em><input class="tn btn-xs btn-danger" type="submit" value="Delete"></em>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <ul class="pagination">
+              {% if prev_url %}
+              <li class="page-item">
+                <a href="{{ prev_url }}" class="page-link" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                  <span class="sr-only">Previous</span>
+                </a>
+              </li>
+              {% endif %}
+              {% if next_url %}
+              <li class="page-item">
+                <a href="{{ next_url }}" class="page-link" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                  <span class="sr-only">Next</span>
+                </a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+
+      <!-- DataTables Rotas -->
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr class="success">
+                  <th colspan="3" class="text-center"><h2>Rosters</h2></th>
+                </tr>
+              </thead>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th><i class="fa fa-file"></i> Rota</th>
+                  <th class="text-center"><em class="fa fa-trash"></em></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rota in rotas %}
+                <tr>
+                  <td>{{ rota.id }}</td>
+                  <td>{{ rota.file_name }}</td>
+                  <td class="text-center">
+                    <form action="{{ url_for('delete_rota' , id=rota.id) }}" method="POST">
+                      <em><input class="tn btn-xs btn-danger" type="submit" value="Delete"></em>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+ 
+        {% endblock %}
+        {% block scripts %}
+        {{ super() }}
+<script>
+  $("#record").popover({
+    html: true,
+    content: function() {
+      return $('#popover-content').html();
+    }
+  });
+  $("#employee").popover({
+    html: true,
+    content: function() {
+      return $('#popover-content-employee').html();
+    }
+  });
+  $("#rota").popover({
+    html: true,
+    content: function() {
+      return $('#popover-content-rota').html();
+    }
+  });
+   $("#delete-records").popover({
+    html: true,
+    content: function() {
+      return $('#popover-content-delete-records').html();
+    }
+  });
+
+</script>
+        {% endblock %}
+
+
