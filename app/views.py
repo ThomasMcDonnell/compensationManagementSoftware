@@ -4,8 +4,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
 from app.forms import (CompanyAccount, EmployeeAccount, RecordForm, Login,
-                       UploadRota)
+                       UploadRota, ResetPasswordRequestForm, ResetPasswordForm)
 from app.models import Company, Employee, Record, Rota
+from app.emails import send_password_reset_email
 from datetime import datetime
 from io import BytesIO
 import json
@@ -78,7 +79,7 @@ def company_registration():
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route('/employee/create', methods=['POST'])
+@app.route('/employee/create', methods=['GET', 'POST'])
 @login_required
 def employee():
     user = Employee.query.filter_by(id=current_user.id).first_or_404()
@@ -99,7 +100,7 @@ def employee():
     return redirect(url_for('index'))
 
 
-@app.route('/record/create', methods=['POST'])
+@app.route('/record/create', methods=['GET', 'POST'])
 @login_required
 def record():
     user = Employee.query.filter_by(id=current_user.id).first_or_404()
@@ -119,7 +120,7 @@ def record():
     return redirect(url_for('index'))    
 
 
-@app.route('/upload/file', methods=['POST'])
+@app.route('/upload/file', methods=['GET', 'POST'])
 @login_required
 def upload_file():
     user = Employee.query.filter_by(id=current_user.id).first_or_404()
@@ -147,7 +148,7 @@ def file_download(id):
                      as_attachment=False)
 
 
-@app.route('/delete/rota<int:id>', methods=['POST'])
+@app.route('/delete/rota<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_rota(id):
     rota = Rota.query.get_or_404(id)
@@ -159,7 +160,7 @@ def delete_rota(id):
     return redirect(url_for('index'))
 
 
-@app.route('/delete/record<int:id>', methods=['POST'])
+@app.route('/delete/record<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_record(id):
     record = Record.query.get_or_404(id)
@@ -171,7 +172,7 @@ def delete_record(id):
     return redirect(url_for('index'))
 
 
-@app.route('/delete/employee<int:id>', methods=['POST'])
+@app.route('/delete/employee<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_employee(id):
     employee = Employee.query.get_or_404(id)
@@ -183,7 +184,7 @@ def delete_employee(id):
     return redirect(url_for('index'))
 
 
-@app.route('/delete/record/all<int:id>', methods=['POST'])
+@app.route('/delete/record/all<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_all_records(id):
     employee = Employee.query.get_or_404(id)
@@ -218,6 +219,39 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+
+@app.route('/reset/password/request', methods=['GET', 'POST'])
+def password_reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        employee = Employee.query.filter_by(email=form.email.data).first()
+        if employee:
+            send_password_reset_email(employee)
+            flash('An email has been sent to the address you have provided.')
+            return redirect(url_for('login'))
+        flash('Invalid email. There is not such email registered.')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html', title='Password Reset',
+                           form=form)
+
+
+@app.route('/reset/password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    employee = Employee.verify_reset_password_token(token)
+    if not employee:
+        flash('Invalid Token or Reset Password Expired')
+        return redirect(url_for('login'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        employee.set_password(form.password.data)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
 
 
 # api end points 

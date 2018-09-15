@@ -1,8 +1,10 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from datetime import datetime
+from time import time
 from hashlib import md5
-from app import db, login
+import jwt
+from app import db, login, app
 
 
 class Employee(UserMixin, db.Model):
@@ -35,6 +37,23 @@ class Employee(UserMixin, db.Model):
         Determine User permissions (admin=True or admin=False)
         """
         return self.is_admin
+    
+    def get_password_reset_token(self, expires_in=600):
+        """
+        returns a Json Web Token
+        """
+        return jwt.encode(
+            {'reset_password' : self.id, 'exp' : time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.cofig['SECRET_KEY'], 
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return Employee.query.get(id)
 
     def __repr__(self):
         return f'Employee: {self.first_name} {self.last_name}'
