@@ -37,23 +37,27 @@ class Employee(UserMixin, db.Model):
         Determine User permissions (admin=True or admin=False)
         """
         return self.is_admin
-    
-    def get_password_reset_token(self, expires_in=600):
+
+    def get_reset_password_token(self, expires_in=600):
         """
-        returns a Json Web Token
+        return a JSON web token 
         """
         return jwt.encode(
-            {'reset_password' : self.id, 'exp' : time() + expires_in},
+            {'reset_password': self.id, 'exp': time() + expires_in},
             app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
 
     @staticmethod
     def verify_reset_password_token(token):
+        """
+        Verify Token and return Employee else return None
+        """
         try:
-            id = jwt.decode(token, app.cofig['SECRET_KEY'], 
+            id = jwt.decode(token, app.config['SECRET_KEY'],
                             algorithms=['HS256'])['reset_password']
         except:
             return
         return Employee.query.get(id)
+
 
     def __repr__(self):
         return f'Employee: {self.first_name} {self.last_name}'
