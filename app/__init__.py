@@ -20,7 +20,7 @@ moment = Moment()
 mail = Mail()
 
 # Application Factory
-def create_app():
+def create_app(config_class=Config):
     # Initilize app
     app = Flask(__name__)
     app.config.from_object(Config)
