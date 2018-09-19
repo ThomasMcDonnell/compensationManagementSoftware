@@ -122,7 +122,8 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="{{ url_for('index') }}">SB Admin</a>
+      <a class="navbar-brand" href="{{ url_for('main.index') }}"> Compensation
+      Management</a>
     </div>
     <!-- Top Menu Items -->
     <ul class="nav navbar-right top-nav">
@@ -137,7 +138,7 @@
           </li>
           <li class="divider"></li>
           <li>
-            <a href="{{ url_for('logout') }}"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+            <a href="{{ url_for('auth.logout') }}"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
           </li>
         </ul>
       </li>
@@ -147,11 +148,11 @@
       <ul class="nav navbar-nav side-nav">
         {% if current_user.is_admin %}
         <li class="active">
-          <a href="{{ url_for('index') }}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+          <a href="{{ url_for('main.index') }}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
         </li>
         {% endif %}
         <li>
-          <a href="{{ url_for('analytics') }}"><i class="fa fa-fw fa-bar-chart-o"></i> Analytics</a>
+          <a href="{{ url_for('main.analytics') }}"><i class="fa fa-fw fa-bar-chart-o"></i> Analytics</a>
         </li>
         <li>
           <a href="javascript:;" data-toggle="collapse" data-target="#rotas">
@@ -160,7 +161,7 @@
           <ul id="rotas" class="collapse">
             {% for rota in rotas %}
             <li>
-              <a type="button" href="{{ url_for('file_download', id=rota.id) }}"><i class="fa fa-fw fa-file"></i>
+              <a type="button" href="{{ url_for('main.file_download', id=rota.id) }}"><i class="fa fa-fw fa-file"></i>
                 {{ rota }}
               </a>
             </li>

@@ -15,7 +15,8 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="{{ url_for('index') }}">SB Admin</a>
+      <a class="navbar-brand" href="{{ url_for('main.index') }}">
+        Compensation Management</a>
     </div>
 
     <!-- Top Menu Items -->
@@ -31,7 +32,7 @@
           </li>
           <li class="divider"></li>
           <li>
-            <a href="{{ url_for('logout') }}"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+            <a href="{{ url_for('auth.logout') }}"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
           </li>
         </ul>
       </li>
@@ -41,10 +42,10 @@
     <div class="collapse navbar-collapse navbar-ex1-collapse">
       <ul class="nav navbar-nav side-nav">
         <li class="active">
-          <a href="{{ url_for('index') }}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+          <a href="{{ url_for('main.index') }}"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
         </li>
         <li>
-          <a href="{{ url_for('analytics') }}"><i class="fa fa-fw fa-bar-chart-o"></i> Analytics</a>
+          <a href="{{ url_for('main.analytics') }}"><i class="fa fa-fw fa-bar-chart-o"></i> Analytics</a>
         </li>
         <li>
           <a href="javascript:;" data-toggle="collapse" data-target="#rotas">
@@ -53,7 +54,7 @@
           <ul id="rotas" class="collapse">
             {% for rota in rotas %}
             <li>
-              <a type="button" href="{{ url_for('file_download', id=rota.id) }}"><i class="fa fa-fw fa-file"></i>
+              <a type="button" href="{{ url_for('main.file_download', id=rota.id) }}"><i class="fa fa-fw fa-file"></i>
                 {{ rota }}
               </a>
             </li>
@@ -70,25 +71,25 @@
                 Create Employee
               </a>
               <div id="popover-content-employee" class="hide">
-                {{ wtf.quick_form(form, action=url_for('employee'), button_map={'submit':'btn btn-success btn-block'}) }}        
+                {{ wtf.quick_form(form, action=url_for('main.employee'), button_map={'submit':'btn btn-success btn-block'}) }}        
               </div>
             </li>
             <li>
               <a data-placement="right" data-toggle="popover" data-title="Create Record" data-container="body" type="button" data-html="true" id="record">Create Record</a>
               <div id="popover-content" class="hide">
-                {{ wtf.quick_form(form_record, action=url_for('record'), button_map={'submit':'btn btn-success btn-block'}) }}        
+                {{ wtf.quick_form(form_record, action=url_for('main.record'), button_map={'submit':'btn btn-success btn-block'}) }}        
               </div>
             </li>
             <li>
               <a data-placement="right" data-toggle="popover" data-title="Upload Rota" data-container="body" type="button" data-html="true" id="rota">Upload Rota</a>
               <div id="popover-content-rota" class="hide">
-                {{ wtf.quick_form(form_file_upload, action=url_for('upload_file'), button_map={'submit':'btn btn-success btn-block'}) }}        
+                {{ wtf.quick_form(form_file_upload, action=url_for('main.upload_file'), button_map={'submit':'btn btn-success btn-block'}) }}        
               </div>
             </li>
             <li>
                 <a data-placement="right" data-toggle="popover" data-title="Delete All Records" data-container="body" type="button" data-html="true" id="delete-records"> Delete All Records</a>
               <div id="popover-content-delete-records" class="hide">
-                <form action="{{ url_for('delete_all_records', id=current_user.id) }}" method="POST">
+                <form action="{{ url_for('main.delete_all_records', id=current_user.id) }}" method="POST">
                   <input class="btn btn-xs btn-danger btn-block" type="submit" value="Delete">
                 </form>
               </div>
@@ -132,7 +133,7 @@
               <td class="text-center"><em><button type="button" class="btn btn-xs-danger" disabled>Delete</button></em></td>
               {% else %}
               <td class="text-center">
-                <form action="{{ url_for('delete_employee' , id=employee.id) }}" method="POST">
+                <form action="{{ url_for('main.delete_employee' , id=employee.id) }}" method="POST">
                   <em><input class="btn btn-xs btn-danger" type="submit" value="Delete"></em>
                 </form>
               </td>
@@ -172,7 +173,7 @@
                   <td><em class="glyphicon glyphicon-euro"></em> {{ record.amount }}</td>
                   <td>{{ record.msr }} %</td>
                   <td class="text-center">
-                    <form action="{{ url_for('delete_record' , id=record.id) }}" method="POST">
+                    <form action="{{ url_for('main.delete_record' , id=record.id) }}" method="POST">
                       <em><input class="tn btn-xs btn-danger" type="submit" value="Delete"></em>
                     </form>
                   </td>
@@ -224,7 +225,7 @@
                   <td>{{ rota.id }}</td>
                   <td>{{ rota.file_name }}</td>
                   <td class="text-center">
-                    <form action="{{ url_for('delete_rota' , id=rota.id) }}" method="POST">
+                    <form action="{{ url_for('main.delete_rota' , id=rota.id) }}" method="POST">
                       <em><input class="tn btn-xs btn-danger" type="submit" value="Delete"></em>
                     </form>
                   </td>
